@@ -22,6 +22,7 @@ def download_chess_com_games(username, max_games=10):
     # Limit the number of games
     games_data = [{
         "id": game['uuid'],
+        "end_time": game['end_time'],
         "time_control": game['time_control'],
         "time_class": game['time_class'],
         "pgn": game['pgn'],
@@ -71,7 +72,7 @@ def analyze_game(pgn_game, output_dir, game_number, eco_db):
     for move in game.mainline_moves():
         board.push(move)
 
-        info = engine.analyse(board, chess.engine.Limit(depth=10), multipv=3)
+        info = engine.analyse(board, chess.engine.Limit(depth=25), multipv=3)
         fen = board.fen()
         if fen in eco_db:
             eco_code, opening_name, opening_variation = eco_db[fen]
@@ -99,7 +100,7 @@ def analyze_game(pgn_game, output_dir, game_number, eco_db):
                 "depth": variation['depth'],
                 "eval": score.score(mate_score=10000) if mate is None else None,
                 "mate": mate,
-                "pv": [mv.uci() for mv in variation['pv']],
+                "pv": [mv.uci() for mv in variation['pv']] if variation.get('pv', None) else None,
             }
             move_data["variations"].append(variation_data)
 
