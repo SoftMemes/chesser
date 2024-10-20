@@ -61,8 +61,8 @@ def load_eco_pgn(filepath):
 
 def analyze_game(pgn_game, output_dir, game_number, eco_db):
     # Initialize Stockfish engine
-    engine = chess.engine.SimpleEngine.popen_uci("/opt/homebrew/bin/stockfish")
-    engine.configure({"Threads": 16})
+    engine = chess.engine.SimpleEngine.popen_uci("/home/freed/opt/stockfish/stockfish")
+    engine.configure({"Threads": 12})
 
     game = chess.pgn.read_game(io.StringIO(pgn_game))
     board = game.board()
@@ -127,6 +127,10 @@ def main():
         print(f"Analyzing game {i+1}...")
         moves = analyze_game(game['pgn'], output_dir, i+1, eco_db)
         output_file = os.path.join(output_dir, f"{game['id']}.json")
+        # If the output file already exists, skip
+        if os.path.exists(output_file):
+            print(f"Not analyzing {game['id']}, already exists")
+            continue
         game_data = {
             **game,
             "moves": moves
